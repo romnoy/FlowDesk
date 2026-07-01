@@ -1,0 +1,191 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-dark-900: #F3FAF6;
+  /* Soft light mint background */
+  --color-dark-800: #FFFFFF;
+  /* Pure white card/sidebar background */
+  --color-dark-700: #E2F5EA;
+  /* Light green hover state */
+  --color-dark-600: #C2EDD5;
+  /* Greenish border / outline */
+
+  --color-primary-500: #10B981;
+  /* Emerald-500 (Primary accent) */
+  --color-primary-600: #059669;
+  /* Emerald-600 (Darker primary) */
+
+  --color-accent-blue: #2563EB;
+  --color-accent-red: #EF4444;
+  --color-accent-green: #10B981;
+
+  --font-sans: "Rubik", "Outfit", "Inter", sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-dark-900);
+    color: #064E3B;
+    /* Deep emerald-slate body text */
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Override text-white globally to keep headers readable on white/light bg */
+  .text-white {
+    color: #064E3B !important;
+  }
+
+  /* Specifically force dark green text on dashboard headers, cards, titles and table rows */
+  h2.text-white,
+  h3.text-white,
+  h4.text-white,
+  h5.text-white,
+  td.text-white,
+  span.text-white:not(button *, .bg-primary-600 *, .bg-primary-500 *) {
+    color: #064E3B !important;
+  }
+
+  /* Robust and simple text-white override:
+     Titles and headers that use text-white are converted to deep green.
+     White text is kept only in active buttons, links, or primary-colored wrappers. */
+  .text-white:not(button *,
+    button,
+    .bg-gradient-to-r *,
+    .bg-primary-600 *,
+    .bg-primary-500 *,
+    .bg-emerald-500 *,
+    .bg-indigo-600 *,
+    .bg-rose-500 *,
+    .bg-amber-500 *,
+    .bg-slate-500 *,
+    .bg-slate-700 *) {
+    color: #064E3B !important;
+  }
+
+  /* Force white text on buttons, primary-color backgrounds, and anything inside them */
+  button.bg-primary-600,
+  button.bg-primary-500,
+  button.bg-gradient-to-r,
+  button.bg-gradient-to-tr,
+  button.bg-gradient-to-br,
+  button.bg-primary-600 *,
+  button.bg-primary-500 *,
+  button.bg-gradient-to-r *,
+  button.bg-gradient-to-tr *,
+  button.bg-gradient-to-br *,
+  .bg-primary-600,
+  .bg-primary-600 *,
+  .bg-primary-500,
+  .bg-primary-500 *,
+  .bg-emerald-600,
+  .bg-emerald-600 *,
+  .bg-emerald-500,
+  .bg-emerald-500 * {
+    color: #FFFFFF !important;
+  }
+
+  /* Dashboard stats numbers must be readable deep green, not white! */
+  .text-3xl.font-extrabold.text-white,
+  .text-3xl.font-extrabold {
+    color: #064E3B !important;
+  }
+
+  .text-slate-100 {
+    color: #064E3B !important;
+  }
+
+  .text-slate-200 {
+    color: #0B5B45 !important;
+  }
+
+  .text-slate-300 {
+    color: #0F6A52 !important;
+  }
+
+  .text-slate-400 {
+    color: #1A7E64 !important;
+  }
+
+  .text-slate-500 {
+    color: #2D8C73 !important;
+  }
+
+  .text-slate-600 {
+    color: #4C9B86 !important;
+  }
+
+  /* Dropdown and inputs styling for light mode */
+  input,
+  select,
+  textarea {
+    background-color: #FFFFFF !important;
+    color: #064E3B !important;
+    border-color: #C2EDD5 !important;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--color-primary-500) !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1) !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #8EBCAE !important;
+  }
+
+  /* Focus visible outline for keyboard navigation */
+  :focus-visible {
+    outline: 3px solid var(--color-primary-500) !important;
+    outline-offset: 2px !important;
+  }
+}
+
+/* Eliminate all gradients and force solid colors */
+.bg-gradient-to-r,
+.bg-gradient-to-tr,
+.bg-gradient-to-br,
+.bg-gradient-to-l,
+.bg-gradient-to-t {
+  background-image: none !important;
+  background-color: var(--color-primary-600) !important;
+}
+
+.bg-gradient-to-r:hover,
+.bg-gradient-to-tr:hover,
+.bg-gradient-to-br:hover,
+.bg-gradient-to-l:hover,
+.bg-gradient-to-t:hover {
+  background-color: var(--color-primary-500) !important;
+}
+
+/* Remove all ambient background gradients/glows */
+.bg-radial-gradient,
+[class*="bg-gradient-to-tr from-primary-500/"],
+[class*="bg-gradient-to-tr from-primary-500/5"] {
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Premium scrollbar styling for light theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-dark-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-dark-600);
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-dark-700);
+}
