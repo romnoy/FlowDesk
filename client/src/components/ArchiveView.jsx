@@ -10,6 +10,7 @@ import {
   Trash2,
   AlertTriangle
 } from 'lucide-react';
+import TaskModal from './TaskModal';
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '';
@@ -38,6 +39,8 @@ export default function ArchiveView({ hierarchy, onNavigateToProject }) {
   const [transcriptToDelete, setTranscriptToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
   const handleDeleteConfirm = async () => {
     if (!transcriptToDelete) return;
@@ -154,10 +157,8 @@ export default function ArchiveView({ hierarchy, onNavigateToProject }) {
       }
 
       const taskData = await res.json();
-
-      if (onNavigateToProject) {
-        onNavigateToProject(taskData.project_id);
-      }
+      setSelectedTask(taskData);
+      setIsTaskModalOpen(true);
     } catch (err) {
       setTaskErrors(prev => ({
         ...prev,
@@ -741,6 +742,21 @@ export default function ArchiveView({ hierarchy, onNavigateToProject }) {
           </div>
         </div>
       )}
+
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => {
+          setIsTaskModalOpen(false);
+          setSelectedTask(null);
+        }}
+        task={selectedTask}
+        projectId={selectedTask ? selectedTask.project_id : null}
+        onSuccess={() => {
+          if (selectedTranscript) {
+            handleViewDetails(selectedTranscript.id);
+          }
+        }}
+      />
     </div>
   );
 }

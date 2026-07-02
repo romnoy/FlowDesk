@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   LayoutGrid, CheckSquare, FileText, Archive, Plus, Clock,
   AlertCircle, TrendingUp, Folder, Trash2, ChevronLeft, ChevronDown, Loader2,
-  Triangle, Circle
+  Triangle, Circle, Pencil
 } from 'lucide-react';
 import UploadZone from './components/UploadZone';
 import CreateHierarchyModal from './components/CreateHierarchyModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
+import EditHierarchyModal from './components/EditHierarchyModal';
 import KanbanBoard from './components/KanbanBoard';
 import ApprovalScreen from './components/ApprovalScreen';
 import ArchiveView from './components/ArchiveView';
@@ -36,6 +37,10 @@ function App() {
   const [deleteType, setDeleteType] = useState('area');
   const [deleteId, setDeleteId] = useState(null);
   const [deleteName, setDeleteName] = useState('');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editType, setEditType] = useState('area');
+  const [editId, setEditId] = useState(null);
+  const [editName, setEditName] = useState('');
   const [expandedAreas, setExpandedAreas] = useState({});
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -153,6 +158,8 @@ function App() {
   };
   const openCreateModal = (type, parentId = null) => { setCreateType(type); setCreateParentId(parentId); setIsCreateOpen(true); };
   const openDeleteModal = (type, id, name) => { setDeleteType(type); setDeleteId(id); setDeleteName(name); setIsDeleteOpen(true); };
+  const openEditModal = (type, id, name) => { setEditType(type); setEditId(id); setEditName(name); setIsEditOpen(true); };
+  const handleEditSuccess = () => { fetchHierarchy(); fetchTasks(); };
   const handleCreateSuccess = (newData) => {
     fetchHierarchy();
     if (createType === 'project') {
@@ -310,9 +317,14 @@ function App() {
                           <Plus className="w-3 h-3" aria-hidden="true" />
                         </button>
                         {area.name !== 'כללי' && (
-                          <button onClick={() => openDeleteModal('area', area.id, area.name)} className="p-1.5 min-w-[24px] min-h-[24px] text-slate-200 hover:text-rose-600 transition-colors" aria-label={`מחק קטגוריה ${area.name}`}>
-                            <Trash2 className="w-3 h-3" aria-hidden="true" />
-                          </button>
+                          <>
+                            <button onClick={() => openEditModal('area', area.id, area.name)} className="p-1.5 min-w-[24px] min-h-[24px] text-slate-200 hover:text-white! transition-colors" aria-label={`ערוך קטגוריה ${area.name}`}>
+                              <Pencil className="w-3 h-3" aria-hidden="true" />
+                            </button>
+                            <button onClick={() => openDeleteModal('area', area.id, area.name)} className="p-1.5 min-w-[24px] min-h-[24px] text-slate-200 hover:text-rose-600 transition-colors" aria-label={`מחק קטגוריה ${area.name}`}>
+                              <Trash2 className="w-3 h-3" aria-hidden="true" />
+                            </button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -328,6 +340,9 @@ function App() {
                               <span className="truncate">{proj.name}</span>
                             </button>
                             <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity ml-1.5">
+                              <button onClick={() => openEditModal('project', proj.id, proj.name)} className="p-1.5 min-w-[24px] min-h-[24px] text-slate-200 hover:text-white! transition-colors" aria-label={`ערוך פרויקט ${proj.name}`}>
+                                <Pencil className="w-3 h-3" aria-hidden="true" />
+                              </button>
                               <button onClick={() => openDeleteModal('project', proj.id, proj.name)} className="p-1.5 min-w-[24px] min-h-[24px] text-slate-200 hover:text-rose-600 transition-colors" aria-label={`מחק פרויקט ${proj.name}`}>
                                 <Trash2 className="w-3 h-3" aria-hidden="true" />
                               </button>
@@ -675,6 +690,7 @@ function App() {
 
       <CreateHierarchyModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} type={createType} parentId={createParentId} hierarchy={hierarchy} onSuccess={handleCreateSuccess} />
       <DeleteConfirmModal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} targetType={deleteType} targetId={deleteId} targetName={deleteName} onSuccess={handleDeleteSuccess} />
+      <EditHierarchyModal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} type={editType} id={editId} initialName={editName} onSuccess={handleEditSuccess} />
       <TaskModal isOpen={isTaskModalOpen} onClose={() => setIsTaskModalOpen(false)} task={selectedTask} projectId={selectedTask ? selectedTask.project_id : selectedProjectId} onSuccess={fetchTasks} />
 
       {showExitConfirm && (

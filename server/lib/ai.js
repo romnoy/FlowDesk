@@ -142,8 +142,69 @@ function generateMockAnalysis(rawText, hierarchy) {
     });
   }
 
+  // Build dynamic summary based on transcript content and matched keywords
+  const topics = [];
+  if (hasKeywords(rawText, ['אתר', 'backend', 'עיצוב', 'ממשק'])) {
+    topics.push('פיתוח Backend ועיצוב ממשק לאתר הבית');
+  }
+  if (hasKeywords(rawText, ['אפליקציה', 'מובייל', 'QA', 'בדיקות'])) {
+    topics.push('בדיקות QA ואפליקציית מובייל');
+  }
+  if (hasKeywords(rawText, ['קמפיין', 'שיווק', 'פייסבוק'])) {
+    topics.push('שיווק ופרסום דיגיטלי');
+  }
+  if (topics.length === 0) {
+    topics.push('קידום משימות שוטפות');
+  }
+
+  const getTranscriptSummarySnippet = (text) => {
+    const lines = text.split('\n')
+      .map(line => line.trim())
+      .filter(line => {
+        if (!line) return false;
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(line)) return false; // timestamp
+        if (line.includes('משתתפים:') || line.includes('נוכחים:')) return false;
+        // Skip speaker headers (short line, no punctuation)
+        if (line.length <= 25 && !/[,.:!?]/.test(line)) return false;
+        return true;
+      });
+
+    const snippets = [];
+    for (const line of lines) {
+      let cleanLine = line;
+      const colonIndex = line.indexOf(':');
+      if (colonIndex > 0 && colonIndex < 20 && colonIndex !== line.length - 1) {
+        cleanLine = line.substring(colonIndex + 1).trim();
+      }
+
+      const lower = cleanLine.toLowerCase();
+      if (
+        cleanLine.length > 8 &&
+        !lower.startsWith('שלום') &&
+        !lower.startsWith('בוקר טוב') &&
+        !lower.startsWith('ערב טוב') &&
+        !lower.startsWith('מעולה') &&
+        !lower.startsWith('תודה')
+      ) {
+        snippets.push(cleanLine);
+      }
+      if (snippets.length >= 2) break;
+    }
+    return snippets.join(' ');
+  };
+
+  const topicsText = topics.join(' וכן ');
+  const conversationSnippet = getTranscriptSummarySnippet(rawText);
+  let summaryText = `סיכום פגישה מקומי (מצב מוק): הפגישה התמקדה בנושא ${topicsText}.`;
+  if (conversationSnippet) {
+    const cleanSnippet = conversationSnippet.length > 150 
+      ? conversationSnippet.substring(0, 150) + '...' 
+      : conversationSnippet;
+    summaryText += ` מתוך השיחה: "${cleanSnippet}"`;
+  }
+
   return {
-    summary: `סיכום פגישה מקומי (מצב מוק): פגישת עבודה שדנה בקידום משימות שוטפות. במהלך הפגישה הועלו נקודות מרכזיות לביצוע וחילקנו משימות בהתאם לתחומי האחריות.`,
+    summary: summaryText,
     tasks: tasks
   };
 }

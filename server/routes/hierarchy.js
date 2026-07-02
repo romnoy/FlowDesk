@@ -126,7 +126,73 @@ router.delete('/projects/:id', (req, res) => {
     res.status(500).json({ error: 'שגיאה במחיקת פרויקט' });
   }
 });
+// PUT /api/hierarchy/areas/:id - Updates an Area name
+router.put('/areas/:id', (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
 
+  if (!name || name.trim() === '') {
+    return res.status(400).json({ error: 'שם הקטגוריה אינו יכול להיות ריק' });
+  }
 
+  try {
+    // Check if Area exists
+    const area = db.prepare('SELECT * FROM areas WHERE id = ?').get(id);
+    if (!area) {
+      return res.status(404).json({ error: 'הקטגוריה המבוקשת אינה קיימת' });
+    }
+
+    if (area.name === 'כללי') {
+      return res.status(400).json({ error: 'לא ניתן לערוך את קטגוריית כללי' });
+    }
+
+    // Check if another Area name already exists (case-insensitive)
+    const existing = db.prepare('SELECT 1 FROM areas WHERE LOWER(name) = LOWER(?) AND id != ?').get(name.trim(), id);
+    if (existing) {
+      return res.status(400).json({ error: 'שם זה כבר קיים ברמה זו. נא לבחור שם אחר.' });
+    }
+
+    const stmt = db.prepare('UPDATE areas SET name = ? WHERE id = ?');
+    stmt.run(name.trim(), id);
+
+    res.status(200).json({ id: Number(id), name: name.trim() });
+  } catch (error) {
+    console.error('Error updating area:', error);
+    res.status(500).json({ error: 'שגיאה בעדכון קטגוריה' });
+  }
+});
+
+// PUT /api/hierarchy/projects/:id - Updates a Project name
+router.put('/projects/:id', (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+
+  if (!name || name.trim() === '') {
+    return res.status(400).json({ error: 'שם הפרויקט אינו יכול להיות ריק' });
+  }
+
+  try {
+    // Check if Project exists
+    const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+    if (!project) {
+      return res.status(404).json({ error: 'הפרויקט המבוקש אינו קיים' });
+    }
+
+    // Check if Project name already exists under the same Area (excluding the current project)
+    const existing = db.prepare('SELECT 1 FROM projects WHERE LOWER(name) = LOWER(?) AND area_id = ? AND id != ?').get(name.trim(), project.area_id, id);
+    if (existing) {
+      return res.status(400).json({ error: 'שם זה כבר קיים ברמה זו. נא לבחור שם אחר.' });
+    }
+
+    const stmt = db.prepare('UPDATE projects SET name = ? WHERE id = ?');
+    stmt.run(name.trim(), id);
+
+    res.status(200).json({ id: Number(id), name: name.trim(), area_id: project.area_id });
+  } catch (error) {
+    console.error('Error updating project:', error);
+    res.status(500).json({ error: 'שגיאה בעדכון פרויקט' });
+  }
+});
 
 module.exports = router;
+

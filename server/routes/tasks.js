@@ -28,6 +28,27 @@ router.get('/', (req, res) => {
   }
 });
 
+// GET /api/tasks/:id - Fetches a single task by ID
+router.get('/:id', (req, res) => {
+  const { id } = req.params;
+  try {
+    const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+    if (!task) {
+      return res.status(404).json({ error: 'המשימה המבוקשת אינה קיימת' });
+    }
+
+    res.status(200).json({
+      ...task,
+      id: Number(task.id),
+      project_id: task.project_id ? Number(task.project_id) : null,
+      transcript_id: task.transcript_id ? Number(task.transcript_id) : null
+    });
+  } catch (error) {
+    console.error('Error fetching task:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // POST /api/tasks - Creates a new task
 router.post('/', (req, res) => {
   const { title, description, priority, status, due_date, project_id, transcript_id } = req.body;
